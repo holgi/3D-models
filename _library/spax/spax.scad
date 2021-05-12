@@ -219,3 +219,4 @@ module spax_bore_hole(size, total_height=0) {
     cylinder(shank_height, d=shank_diameter, $fn=120);
 }
 
+translate([0, 0, 5])rotate([0, 180, 0])spax_bore_hole(4, 5);

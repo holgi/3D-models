@@ -2,12 +2,11 @@
 
 Create Chamfers For Cubes
 
-Most important modules:
+Most important module:
 
-    chamfer_edge(cube_size, radius, edge)
-    chamfered_cube(cube_size, radius, edges=[0:11])
+    chamfered_cube(cube_size, radius, edges=[0:11], center=false)
 
-Most important is to understand the numbering of the edges:
+It is important to understand the numbering of the edges:
 
 
           +--------- 10 ---------+
@@ -36,9 +35,6 @@ Most important is to understand the numbering of the edges:
     |/                     |/
     +---------- 0 ---------+
 
-
-The call to `chamfer_edge([10, 20, 30], 1, 8)` will give you a _negative_
-chamfer for the upper front side of a 10 x 20 x 30 cube with a radius of 1.
 
 A call to `chamfered_cube([10, 20, 30], 1, edges=[8:11])` will give you a
 cube with the size of 10 x 20 x 30, the upper side will have chamfers.
@@ -84,7 +80,7 @@ module basic_chamfer(length, radius) {
 }
 
 module chamfer_edge(cube_size, radius, edge) {
-    /* returns one chamfer for an edge of an cube */
+    /* returns one chamfer for one edge of an cube */
     translation_vektor = CHAMFER_EDGES[edge][0];
     rotation = CHAMFER_EDGES[edge][1];
     length_index = CHAMFER_EDGES[edge][2];
@@ -95,15 +91,18 @@ module chamfer_edge(cube_size, radius, edge) {
     translate(translation) rotate(rotation) basic_chamfer(length, radius);
 }
 
-module chamfered_cube(cube_size, radius, edges=[0:11]) {
+module chamfered_cube(cube_size, radius, edges=[0:11], center=false) {
     /* returns a cube with chamfers applied to the specified edges */
-    difference() {
-        cube(cube_size);
-        for (edge=edges) {
-            chamfer_edge(cube_size, radius, edge);
+    translation = center ? [for(i=cube_size) i/-2] : [0, 0, 0];
+    translate(translation) {
+        difference() {
+            cube(cube_size);
+            for (edge=edges) {
+                chamfer_edge(cube_size, radius, edge);
+            }
         }
     }
 }
 
 
-chamfered_cube([30, 20, 10], radius=1, edges=[8:11]);
+chamfered_cube([30, 20, 10], radius=1, edges=[8:11], center=true);
