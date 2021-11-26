@@ -135,4 +135,4 @@ module mount(
 }
 
 
-mount(100, 50, rim=true);
+mount(52, 33, spax=3, rim=false);
