@@ -29,3 +29,22 @@ Description of the parameters:
 - `screw_wall`:       minimum thickness of material around the screw  [default=3]
 - `screw_head_dia`:   diameter of the screw head  [default=5.5, for a M3]
 - `crew_head_height`: height of the screw head, [default=3.5, for a M3]
+
+
+custom lid design
+-----------------
+
+if you want to have a custom lid design, have a look at the modules
+`case_lower_part()` or `case_upper_part()` to see how to specify
+a module for the lid of the case.
+
+An example for a upper part with a custom lid:
+
+    module my_custom_lid() {
+        ...
+    }
+
+    module my_custom_upper_part(dimensions, wall=3, lid=2, corner=5, screw=3, screw_wall=3, screw_head_dia=5.5, screw_head_height=3) {
+        generate_upper_part(dimensions, wall, lid, corner, screw, screw_wall, screw_head_dia, screw_head_height)
+            my_custom_lid();
+    }

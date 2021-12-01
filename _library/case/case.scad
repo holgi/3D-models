@@ -21,6 +21,11 @@ The following parameters define the box and can be supplied to the modules:
     screw_wall:        minimum thickness of material around the screw  [default=3]
     screw_head_dia:    diameter of the screw head  [default=5.5, for a M3]
     screw_head_height: height of the screw head, [default=3.5, for a M3]
+
+
+if you want to have a custom lid design, have a look at the modules
+`case_lower_part()` or `case_upper_part()` to see how to specify
+a module for the lid of the case.
 */
 
 $fn = 120;
@@ -46,6 +51,16 @@ function lower_pos_offset(screw, corner, wall) = sin(45) * reinforcement_radius(
 function screw_center_offset(screw, corner, wall) = (lower_pos_offset(screw, corner, wall) + outer_corner_offset(corner)) / 2;
 
 
+module in_all_4_corners(dx, dy) {
+    /* repeats a child element in four corners of a rectangle */
+    for (v = CORNER_VECTORS) {
+        translate([v[0] * dx, v[1] * dy, 0])
+            rotate([0, 0, v[2]])
+                children();
+    }
+}
+
+
 module round_rect(dimensions, corner=5) {
     /* basic form for the case
 
@@ -65,15 +80,13 @@ module round_rect(dimensions, corner=5) {
 
     corner_offset_x = l_wo_corner / 2;
     corner_offset_y = w_wo_corner / 2;
-    for (cv = CORNER_VECTORS) {
-        translate([cv[0] * corner_offset_x, cv[1] * corner_offset_y, 0])
-            cylinder(height, d=corner*2, center=true);
-    }
+    in_all_4_corners(corner_offset_x, corner_offset_y)
+        cylinder(height, d=corner*2, center=true);
 }
 
 
-module round_rect_box(dimensions, wall=3, lid=2, corner=5) {
-    /* a basic box
+module round_rect_wall(dimensions, wall=3, lid=2, corner=5) {
+    /* the wall of a basic box
 
     The resulting form will be centered
 
@@ -81,20 +94,36 @@ module round_rect_box(dimensions, wall=3, lid=2, corner=5) {
     wall:       wall thickness
     corner:     corner radius
     */
-    inner_length = dimensions[0] - 2 * wall;
-    inner_width = dimensions[1] - 2 * wall;
-    inner_height = dimensions[2];
+    outer_length = dimensions[0];
+    outer_width = dimensions[1];
+    outer_height = dimensions[2];
+    inner_length = outer_length - 2 * wall;
+    inner_width = outer_width - 2 * wall;
     inner_corner = corner - wall;
-    difference() {
-        round_rect(dimensions, corner);
-        if (corner > wall) {
-            translate([0, 0, lid])
-                round_rect([inner_length, inner_width, inner_height], inner_corner);
-        } else {
-            translate([0, 0, lid])
-                cube([inner_length, inner_width, inner_height], center=true);
+    translate([0, 0, 0])
+        difference() {
+            round_rect([outer_length, outer_width, outer_height], corner);
+            if (corner > wall) {
+                round_rect([inner_length, inner_width, outer_height + 1], inner_corner);
+            } else {
+                cube([inner_length, inner_width, outer_height + 1], center=true);
+            }
         }
-    }
+}
+
+
+module round_rect_lid(dimensions, lid=2, corner=5) {
+    /* the lid of a basic box
+
+    The resulting form will be centered.
+
+    dimensions: vector for [length, width, height], same as in cube()
+    wall:       wall thickness
+    corner:     corner radius
+    */
+    outer_length = dimensions[0];
+    outer_width = dimensions[1];
+    round_rect([outer_length, outer_width, lid], corner);
 }
 
 
@@ -109,9 +138,9 @@ module quarter_cylinder(height, diameter) {
     difference(){
         cylinder(height, d=diameter, center=true);
         translate([diameter / 2, 0, 0])
-            cube([diameter, diameter, height + JOIN], center=true);
+            cube([diameter, diameter, height + 2], center=true);
         translate([0, diameter / 2, 0])
-            cube([diameter, diameter, height + JOIN], center=true);
+            cube([diameter, diameter, height + 2], center=true);
     }
 }
 
@@ -127,8 +156,7 @@ module quarter_cylinder_negative(height, diameter) {
     difference() {
         translate([diameter/2, diameter/2, 0])
             cube([diameter, diameter, height], center=true);
-        translate([-JOIN, -JOIN, 0])
-            cylinder(height + JOIN, d=diameter, center=true);
+        cylinder(height + 2, d=diameter, center=true);
     }
 }
 
@@ -146,10 +174,9 @@ module corner_reinforcement(height, diameter=false, wall=3, corner=5) {
     difference() {
         translate([corner - wall, corner - wall, 0])
             quarter_cylinder(height, used_diameter);
-        quarter_cylinder_negative(height + JOIN, corner * 2);
+        quarter_cylinder_negative(height + 2 , corner * 2);
     }
 }
-
 
 module screw_reinforcements(dimensions, wall=3, corner=5, screw=3, screw_wall=3) {
     /* reinforcements in the corners, large enough to contain screw holes
@@ -164,18 +191,15 @@ module screw_reinforcements(dimensions, wall=3, corner=5, screw=3, screw_wall=3)
     screw_container_diameter = screw + screw_wall * 2;
     used_radius = reinforcement_radius(screw_container_diameter, corner, wall);
 
-    rein_x = dimensions[0] / 2 - inner_corner - wall;
-    rein_y = dimensions[1] / 2 - inner_corner - wall;
-    for (v = CORNER_VECTORS) {
-        translate([v[0] * rein_x, v[1] * rein_y, 0])
-            rotate([0, 0, v[2]])
-            corner_reinforcement(dimensions[2], used_radius * 2, wall, corner);
-    }
+    rein_x = dimensions[0] / 2 - inner_corner - wall + JOIN;
+    rein_y = dimensions[1] / 2 - inner_corner - wall + JOIN;
+    in_all_4_corners(rein_x, rein_y)
+        corner_reinforcement(dimensions[2], used_radius * 2, wall, corner);
 }
 
 
-module case_part(dimensions, wall=3, lid=2, corner=5, screw=3, screw_wall=3) {
-    /* blank upper or lower part with screw reinforcements
+module case_wall(dimensions, wall=3, lid=2, corner=5, screw=3, screw_wall=3) {
+    /* wall with screw reinforcements
 
     the resulting height will be a little bit higher to accomodate
     the diagonal inset later.
@@ -194,7 +218,7 @@ module case_part(dimensions, wall=3, lid=2, corner=5, screw=3, screw_wall=3) {
         dimensions[1],
         dimensions[2] + slope_height,
     ];
-    round_rect_box(dimensions_with_slope, wall, lid, corner);
+    round_rect_wall(dimensions_with_slope, wall, lid, corner);
     screw_reinforcements(dimensions_with_slope, wall, corner, screw, screw_wall);
 }
 
@@ -227,10 +251,9 @@ module slope_cutout_form(dimensions, wall=3, corner=5) {
 
     difference () {
         union() {
-            for (cv = CORNER_VECTORS) {
-                translate([cv[0] * corner_offset_x, cv[1] * corner_offset_y, -corner_offset_z])
-                    cylinder(corner_height, lower_radius, upper_radius, center=true);
-            }
+            translate([0, 0, -corner_offset_z])
+                in_all_4_corners(corner_offset_x, corner_offset_y)
+                cylinder(corner_height, lower_radius, upper_radius, center=true);
 
             cube([length, w_wo_corner, height], center=true);
             cube([l_wo_corner, width, height], center=true);
@@ -255,9 +278,8 @@ module slope_cutout_form(dimensions, wall=3, corner=5) {
             translate([cut_offset, 0, cut_offset])
             cube([cut_size, cut_size, cut_size], center=true);
     }
-
-
 }
+
 
 module slope_inset_cutout(dimensions, wall=3, corner=5) {
     /* negative form for the slope inset of the lower box part
@@ -279,6 +301,7 @@ module slope_inset_cutout(dimensions, wall=3, corner=5) {
     }
 }
 
+
 module slope_outset_cutout(dimensions, wall=3, corner=5) {
     /* negative form for the slope outset of the upper box part
 
@@ -289,9 +312,9 @@ module slope_outset_cutout(dimensions, wall=3, corner=5) {
 
     slope_height = wall / 2;
     cube_dimensions = [
-        dimensions[0] + JOIN,
-        dimensions[1] + JOIN,
-        slope_height + JOIN,
+        dimensions[0] + 2 * JOIN,
+        dimensions[1] + 2 * JOIN,
+        slope_height + 2 * JOIN,
     ];
     difference() {
         slope_cutout_form(dimensions, wall, corner);
@@ -301,8 +324,8 @@ module slope_outset_cutout(dimensions, wall=3, corner=5) {
 }
 
 
-module case_lower_part(dimensions, wall=3, lid=2, corner=5, screw=3, screw_wall=3) {
-    /* lower part of the case
+module generate_lower_part(dimensions, wall=3, lid=2, corner=5, screw=3, screw_wall=3) {
+    /* lower part of the case, lid provided as child module
 
     With reinforcements, screw holes and a sloping top corner.
 
@@ -318,9 +341,14 @@ module case_lower_part(dimensions, wall=3, lid=2, corner=5, screw=3, screw_wall=
     */
     slope_height = wall / 2;
     z_offset = (dimensions[2] + slope_height) / 2 - lid;
+    z_lid_offset = (dimensions[2] + slope_height - lid) / 2 ;
     translate([0, 0, z_offset]) {
         difference() {
-            case_part(dimensions, wall, lid, corner, screw, screw_wall);
+            union() {
+                translate([0, 0, -z_lid_offset])
+                    children();
+                case_wall(dimensions, wall, lid, corner, screw, screw_wall);
+            }
 
             translate([0, 0, (dimensions[2] - slope_height) / 2])
                 slope_inset_cutout(dimensions, wall, corner);
@@ -329,16 +357,16 @@ module case_lower_part(dimensions, wall=3, lid=2, corner=5, screw=3, screw_wall=
             screw_offset = screw_center_offset(screw_container_diameter, corner, wall);
             screw_x = dimensions[0] / 2 - screw_offset;
             screw_y = dimensions[1] / 2 - screw_offset;
-            for (v = CORNER_VECTORS) {
-                translate([v[0] * screw_x, v[1] * screw_y, lid])
-                    cylinder(h=dimensions[2], d=screw, center=true);
-            }
+            translate([0, 0, lid])
+                in_all_4_corners(screw_x, screw_y)
+                cylinder(h=dimensions[2], d=screw, center=true);
+
         }
     }
 }
 
-module case_upper_part(dimensions, wall=3, lid=2, corner=5, screw=3, screw_wall=3, screw_head_dia=5.5, screw_head_height=3) {
-    /* upper part of the case
+module generate_upper_part(dimensions, wall=3, lid=2, corner=5, screw=3, screw_wall=3, screw_head_dia=5.5, screw_head_height=3) {
+    /* upper part of the case, lid provided as child module
 
     With reinforcements, screw holes and a sloping top corner.
 
@@ -356,9 +384,14 @@ module case_upper_part(dimensions, wall=3, lid=2, corner=5, screw=3, screw_wall=
     */
     slope_height = wall / 2;
     z_offset = (dimensions[2] + slope_height) / 2 - lid;
+    z_lid_offset = (dimensions[2] + slope_height - lid) / 2 ;
     translate([0, 0, z_offset]) {
         difference() {
-            case_part(dimensions, wall, lid, corner, screw, screw_wall);
+            union() {
+                translate([0, 0, -z_lid_offset])
+                    children();
+                case_wall(dimensions, wall, lid, corner, screw, screw_wall);
+            }
 
             translate([0, 0, (dimensions[2]- slope_height)/2])
                 rotate([180,0,0])
@@ -373,14 +406,55 @@ module case_upper_part(dimensions, wall=3, lid=2, corner=5, screw=3, screw_wall=
             screw_slack_diameter = screw + 0.5;
             screw_head_slack_diameter = screw_head_dia + 0.5;
             height = dimensions[2] + wall / 2;
-            for (v = CORNER_VECTORS) {
-                translate([v[0] * screw_x, v[1] * screw_y, -JOIN])
-                    cylinder(h=height, d=screw_slack_diameter, center=true);
-                translate([v[0] * screw_x, v[1] * screw_y, -screw_head_z - JOIN])
-                    cylinder(h=screw_head_height, d=screw_head_slack_diameter, center=true);
-            }
+            translate([0, 0, -JOIN])
+                in_all_4_corners(screw_x, screw_y)
+                cylinder(h=height, d=screw_slack_diameter, center=true);
+            translate([0, 0, -screw_head_z - JOIN])
+                in_all_4_corners(screw_x, screw_y)
+                cylinder(h=screw_head_height, d=screw_head_slack_diameter, center=true);
         }
     }
+}
+
+module case_lower_part(dimensions, wall=3, lid=2, corner=5, screw=3, screw_wall=3) {
+    /* lower part of the case
+
+    With reinforcements, screw holes and a sloping top corner.
+
+    The resulting form will be centered on x- and y-axis
+    The top of the floor of the case will be on z=0
+
+    dimensions: vector for [length, width, height], same as in cube()
+    wall:       wall size of the box
+    lid:        thickness of the floor or ceiling
+    corner:     corner radius of the box
+    screw:      diameter of the screw, defaults to M3
+    screw_wall: minimum thickness of material around the screw
+    */
+    generate_lower_part(dimensions, wall, lid, corner, screw, screw_wall)
+        round_rect_lid(dimensions, lid, corner);
+}
+
+
+module case_upper_part(dimensions, wall=3, lid=2, corner=5, screw=3, screw_wall=3, screw_head_dia=5.5, screw_head_height=3) {
+    /* upper part of the case, lid provided as child module
+
+    With reinforcements, screw holes and a sloping top corner.
+
+    The resulting form will be centered on x- and y-axis
+    The bottom of the celing of the case will be on z=0
+
+    dimensions:        vector for [length, width, height], same as in cube()
+    wall:              wall size of the box
+    lid:               thickness of the floor or ceiling
+    corner:            corner radius of the box
+    screw:             diameter of the screw, defaults to M3
+    screw_wall:        minimum thickness of material around the screw
+    screw_head_dia:    diameter of the screw head, defaults to M3
+    screw_head_height: height of the screw head, defaults to M3
+    */
+    generate_upper_part(dimensions, wall, lid, corner, screw, screw_wall, screw_head_dia, screw_head_height)
+        round_rect_lid(dimensions, lid, corner);
 }
 
 
