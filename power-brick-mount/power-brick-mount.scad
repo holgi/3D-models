@@ -33,7 +33,7 @@ parameter.
 
 */
 
-include <dw-library/spax/spax.scad>;
+use <dw-library/screws/spax.scad>;
 use <dw-library/chamfer/chamfer.scad>;
 
 $fn=60;
