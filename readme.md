@@ -24,6 +24,11 @@ are designed to add led lighting to the room.
 A simple mount for power bricks. Size can be adapted by simple parameters.
 
 
+### wall-mount
+
+Sometimes you just want to screw something to a wall.
+
+
 
 The library
 -----------
