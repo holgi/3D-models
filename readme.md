@@ -7,6 +7,18 @@ All models are created with [OpenScad][openscad].
 Available models
 ----------------
 
+### BHF Aldi lamp holder
+
+A small holder for some led lamps with motion detector sold by Aldi. This
+holder allows to securely screw the lamps to a wall and secure them with a
+zip tie.
+
+
+### Eufy H30 brush holder
+
+A holder for the cleaning brush included in the Eufy H30 vacuum cleaner.
+
+
 ### jst-adapter
 
 A small adapter for a jst socket for a better fit in a [IKEA][ikea] Tradfri
