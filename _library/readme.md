@@ -5,9 +5,9 @@ The modules in the library are sometimes used by the models. In the models
 source file, they are included / used as `dw-library/path/to/module`
 
 
-### chamfer
+### rounded_cube
 
-Create [OpenScad][openscad] cubes with nice chamfers.
+Create [OpenScad][openscad] rounded cubes.
 
 
 ### shaft-screw-coupling
