@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 683 468" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;">
+    <g transform="matrix(1,0,0,1,-1412.78,-987.955)">
+        <g transform="matrix(1,0,0,1,1413.78,1027.56)">
+            <path d="M218.513,408.3L229.606,408.319L229.606,18.64L217.065,18.64L217.065,0.924L169.16,0.924L169.16,10.845L52.656,10.845L52.656,0.924L1.919,0.924L2.412,149.456L13.751,149.418L13.918,199.025L26.674,198.982L26.759,224.777L14.003,224.82L14.173,275.843L2.835,275.881L3.331,424.421L54.782,424.512L54.794,418.134L171.298,418.341L171.287,424.515L218.484,424.599L218.513,408.3ZM677.662,278.013L665.614,278.073L665.362,227.759L653.318,227.819L653.179,200.607L665.226,200.547L664.971,149.524L677.018,149.463L676.281,2.341L624.83,2.341L624.83,10.845L511.868,10.845L511.868,0.924L462.546,0.924L462.546,18.64L436.75,18.64L436.75,0.924L244.278,0.924L244.278,18.64L231.307,18.64L231.307,408.322L245.017,408.347L244.988,424.602L436.043,424.941L436.072,408.344L463.994,408.393L463.964,424.944L511.87,425.029L511.881,418.338L626.967,418.542L626.956,425.032L678.399,425.123L677.662,278.013Z" style="fill:rgb(211,211,211);fill-rule:nonzero;stroke:black;stroke-width:1.42px;"/>
+        </g>
+        <g id="Beschriftung">
+            <g transform="matrix(1,0,0,1,2.84217e-14,25.3895)">
+                <g transform="matrix(25,0,0,25,1600.43,980.766)">
+                </g>
+                <text x="1458.72px" y="980.766px" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:25px;">left_inset(…)</text>
+            </g>
+            <g transform="matrix(1,0,0,1,227.75,25.3895)">
+                <g transform="matrix(25,0,0,25,1753.31,980.766)">
+                </g>
+                <text x="1526.82px" y="980.766px" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:25px;">large_right_inset(…)</text>
+            </g>
+        </g>
+    </g>
+</svg>

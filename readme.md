@@ -36,6 +36,11 @@ are designed to add led lighting to the room.
 A simple mount for power bricks. Size can be adapted by simple parameters.
 
 
+### sortimo lboxx mini
+
+Create custom insets for the Sortimo L-Boxx Mini.
+
+
 ### wall-mount
 
 Sometimes you just want to screw something to a wall.
