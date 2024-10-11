@@ -22,7 +22,7 @@ module rounded_cube(
 
     $fn=60;
 
-    top_r    = top_radius    < 0 ? corner_radius : top_radius;
+    top_r = top_radius < 0 ? corner_radius : top_radius;
     bottom_r = bottom_radius < 0 ? corner_radius : bottom_radius;
 
     delta_x = (dimensions.x / 2) - corner_radius;
@@ -30,8 +30,7 @@ module rounded_cube(
     delta_z_top = (dimensions.z / 2) - top_r;
     delta_z_bottom = (dimensions.z / 2) - bottom_r;
 
-    module _bend_edge_corner(radius, bend) {
-        // extrudes a quarter rounded corner
+    module _bend_corner(radius, bend) {
         cut_size = radius + 1;
         rotate_extrude(angle = 90)
             translate([bend, 0, 0])
@@ -43,21 +42,19 @@ module rounded_cube(
 
     }
 
-    module _edge_corners(z, radius) {
-        // either use only a cylinder oder a bend_corner as a corner
+    module _real_corners(z, radius) {
         translate([delta_x, delta_y, z]) {
             if (radius == 0) {
                 tmp_z = z < 0 ? 0 : -1;
                 translate([0, 0, tmp_z]) cylinder(1, r=corner_radius);
             } else {
                 bend_radius = corner_radius - radius;
-                _bend_edge_corner(radius, bend_radius);
+                _bend_corner(radius, bend_radius);
             }
         }
     }
 
-    module _vertical_corners(z, radius) {
-        // create the vertical corners
+    module _fake_corners(z, radius) {
         dx = (dimensions.x / 2 ) - radius;
         dy = (dimensions.y / 2 ) - radius;
         if (radius == 0) {
@@ -79,11 +76,11 @@ module rounded_cube(
 
     module _quarter() {
         hull() {
-            _edge_corners(+delta_z_top, top_r);
-            _edge_corners(-delta_z_bottom, bottom_r);
+            _real_corners(+delta_z_top, top_r);
+            _real_corners(-delta_z_bottom, bottom_r);
 
-            _vertical_corners(+delta_z_top, top_r);
-            _vertical_corners(-delta_z_bottom, bottom_r);
+            _fake_corners(+delta_z_top, top_r);
+            _fake_corners(-delta_z_bottom, bottom_r);
             cube([1, 1, dimensions.z], center=true);
         }
     }
@@ -110,4 +107,3 @@ rounded_cube(
     center=true
 );
 //#cube([40, 30, 20], center=true);
-
