@@ -31,7 +31,7 @@ module _hook(outer_dimensions=hook_case_outer, width=10, height=case_wall) {
 }
 
 
-module hook(outer_dimensions=hook_case_outer, width=10, cut_offset=0, joiner=case_wall) {
+module hook(outer_dimensions=hook_case_outer, width=7.5, cut_offset=0, joiner=case_wall) {
     hook_outer_diameter = outer_dimensions.x;
     hook_hole_diameter  = outer_dimensions.x - 2 * width;
 
@@ -41,7 +41,7 @@ module hook(outer_dimensions=hook_case_outer, width=10, cut_offset=0, joiner=cas
 
     difference() {
         translate([0, middle - cut_offset, 0])
-            _hook();
+            _hook(outer_dimensions,width, height=3);
         translate([0, -cut_size.y / 2 - joiner, 0])
             cube(cut_size, center=true);
     }
@@ -67,6 +67,66 @@ module strip_clutch(slack=0) {
 }
 
 
+module wire_clutch_press(outer_dimensions, case_cut_height) {
+
+    inner_dimensions = outer_dimensions - 2 * [case_wall, case_wall, case_plate];
+
+    lower_case_inner_height = case_cut_height - case_plate;
+    upper_case_inner_height = inner_dimensions.z - lower_case_inner_height;
+
+    wire_clutch_press_length = 14; // manually set by playing around in OpenScad
+    wire_clutch_press_height = inner_dimensions.z - led_wire_clutch_height;
+    wire_clutch_press_width  = (
+          inner_dimensions.x    // available room
+        - led_wire_clutch_width // the width of the thick wire clutch section, part 1
+        - 2 * case_wall         // the width of the thick wire clutch section, part 1
+    ) / 2 - 1.5;                // devide by two side and leave a little bit wiggle room
+
+    protrusion_x = case_wall - case_z_radius;
+    protrusion_z = lower_case_inner_height - led_wire_clutch_height;
+    protrusion_case = case_plate - case_z_radius;
+
+    press_dimensions = [
+        wire_clutch_press_width,
+        wire_clutch_press_length,
+        wire_clutch_press_height
+    ];
+
+    // this looks now weird,
+    // but the rounded_cube() module is picky if
+    // the horizontal radius is larger than vertical radius
+    // and the z-dimension is elongated to
+    // cut off the rounded corner and to reach into the base plate
+    press_dimensions_rotated = [
+        press_dimensions.z + protrusion_z + protrusion_case,
+        press_dimensions.y,
+        press_dimensions.x,
+    ];
+
+    translate([-press_dimensions.x, -press_dimensions.y, -protrusion_case]) {
+        difference() {
+            // the pill box shaped part
+            translate([0, 0, -protrusion_z])
+                rotate([0,-90,0])
+                    translate([0, 0, -press_dimensions_rotated.z])
+                        box(press_dimensions_rotated, vertical_radius=protrusion_z, horizontal_radius=protrusion_x);
+
+            // cut off the lower rounded edges
+            translate([-1, -1, -press_dimensions.z])
+                cube(press_dimensions + [2, 2, 0]);
+        }
+
+        // connector to the wall
+        translate([protrusion_x, 0, 0])
+            cube(press_dimensions + [0, 0, protrusion_case - protrusion_z]);
+
+        // connector to the screw_pillar
+        translate([0, protrusion_x, 0])
+            cube(press_dimensions + [protrusion_x, 0, protrusion_case - protrusion_z]);
+    }
+}
+
+
 module hook_case_lower() {
 
     // the base case section
@@ -77,7 +137,9 @@ module hook_case_lower() {
         translate([-led_strip_width / 2, -1, 0])
             cube([led_strip_width, led_strip_clutch_length + 2, case_cut_height]);
 
-        strip_clutch(slack=0.1);
+        // giving the clucth a little slack
+        translate([0, 0, -0.2])
+            strip_clutch(slack=0.1);
     }
 
     // attach the hook
@@ -100,9 +162,14 @@ module hook_case_upper() {
     case_section_upper(hook_case_outer, case_cut_height);
 
     // the led strip clutch press
-    translate([0, 0, hook_case_inner.z ])
-        rotate([0, 180, 0])
-            strip_clutch(slack=0);
+    difference() {
+        translate([0, 0, hook_case_inner.z])
+            rotate([0, 180, 0])
+                strip_clutch(slack=0);
+        // we need to shave off a little bitmore of the clutch height to close the case
+        translate([-hook_case_inner.x / 2, -1, hook_case_inner.z - led_strip_clutch_height - 0.5])
+            cube([hook_case_inner.x, led_strip_clutch_length +  2, 1]);
+    }
 
     press_x_offset = hook_case_outer.x / 2 - case_wall;
     press_y_offset = hook_case_outer.y - screw_pillar_diameter;
@@ -113,8 +180,6 @@ module hook_case_upper() {
                 wire_clutch_press(hook_case_outer, case_cut_height);
     }
 }
-
-
 
 // Assembly
 
@@ -129,3 +194,5 @@ hook_case_lower();
 
 translate([50, 0, 0]) hook_case_upper();
 
+
+translate([- 50, 0, 0]) case(hook_case_outer);

@@ -96,66 +96,6 @@ module clutch_clamp() {
     }
 }
 
-module wire_clutch_press(outer_dimensions, case_cut_height) {
-
-    inner_dimensions = outer_dimensions - 2 * [case_wall, case_wall, case_plate];
-
-    lower_case_inner_height = case_cut_height - case_plate;
-    upper_case_inner_height = inner_dimensions.z - lower_case_inner_height;
-
-    wire_clutch_press_length = 14; // manually set by playing around in OpenScad
-    wire_clutch_press_height = inner_dimensions.z - led_wire_clutch_height;
-    wire_clutch_press_width  = (
-          inner_dimensions.x    // available room
-        - led_wire_clutch_width // the width of the thick wire clutch section, part 1
-        - 2 * case_wall         // the width of the thick wire clutch section, part 1
-    ) / 2 - 1.5;                // devide by two side and leave a little bit wiggle room
-
-    protrusion_x = case_wall - case_z_radius;
-    protrusion_z = lower_case_inner_height - led_wire_clutch_height;
-    protrusion_case = case_plate - case_z_radius;
-
-    press_dimensions = [
-        wire_clutch_press_width,
-        wire_clutch_press_length,
-        wire_clutch_press_height
-    ];
-
-    // this looks now weird,
-    // but the rounded_cube() module is picky if
-    // the horizontal radius is larger than vertical radius
-    // and the z-dimension is elongated to
-    // cut off the rounded corner and to reach into the base plate
-    press_dimensions_rotated = [
-        press_dimensions.z + protrusion_z + protrusion_case,
-        press_dimensions.y,
-        press_dimensions.x,
-    ];
-
-    translate([-press_dimensions.x, -press_dimensions.y, -protrusion_case]) {
-        difference() {
-            // the pill box shaped part
-            translate([0, 0, -protrusion_z])
-                rotate([0,-90,0])
-                    translate([0, 0, -press_dimensions_rotated.z])
-                        box(press_dimensions_rotated, vertical_radius=protrusion_z, horizontal_radius=protrusion_x);
-
-            // cut off the lower rounded edges
-            translate([-1, -1, -press_dimensions.z])
-                cube(press_dimensions + [2, 2, 0]);
-        }
-
-        // connector to the wall
-        translate([protrusion_x, 0, 0])
-            cube(press_dimensions + [0, 0, protrusion_case - protrusion_z]);
-
-        // connector to the screw_pillar
-        translate([0, protrusion_x, 0])
-            cube(press_dimensions + [protrusion_x, 0, protrusion_case - protrusion_z]);
-    }
-}
-
-
 wire_clutch();
 
 translate([led_wire_clutch_width + case_wall, -led_wire_clutch_length, 0])
