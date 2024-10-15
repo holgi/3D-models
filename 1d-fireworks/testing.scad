@@ -58,6 +58,10 @@ module test_usb_c_holes() {
 }
 // test_usb_c_holes();
 
+use <qtpy.scad>
+translate([0, 0, 2])
+    qtpy_mount();
+cube([35, 35, 4], center=true);
 
 
-translate([0, 0, 0]) esp32_model();
+// cylinder(h=20, d1=spool_case_diameter + 2 * spool_case_taper, d2=spool_case_diameter);

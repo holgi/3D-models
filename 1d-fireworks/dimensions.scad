@@ -82,15 +82,45 @@ wire_clutch_assembly_offset    = led_length_requirements - 2 * led_wire_sort_dis
 usb_c_connector = [13.5, 9.0, 5.3]; // mmm
 
 
-// esp32
-esp32_plate  = [18.0, 20.8, 1.6]; // from the adafruit website
-esp32_offset = [11.0,  0.8, 0.0]; // moving the model to [0,0,0]
+// qtpy
 
-esp32_clearance_usb   = 1.2;      // mm, the usb-c part sticks out of the plate
-esp32_clearance_upper = 3.5;      // mm, leave at least this much space above the plate
-esp32_clearance_lower = 1.5;      // mm, leave at least this much space below the plate
+qtpy_clearance_usb   = 1.2;      // mm, the usb-c part sticks out of the plate
+qtpy_clearance_upper = 3.5;      // mm, leave at least this much space above the plate
+qtpy_clearance_lower = 1.5;      // mm, leave at least this much space below the plate
 
-esp32_usbc_width      = esp32_plate.x - (4.5 * 2); // roughly from the website
+
+// measured from prusa spools
+
+spool_inner_diameter      = 87.5;  // mm, measured
+spool_inner_height        = 20.0;  // mm, measured
+spool_inner_ring_height   =  5.0;  // mm, measured
+
+
+// some assumptions from my side
+
+spool_case_taper        =  0.25; // mm, amount of height added to have a slope for the spools to stick on
+spool_case_corner       =  1;    // mm, corner radius of the case
+spool_case_rim_height   =  2;    // mm, the hight of the rim of the cases fitting into each other
+spool_case_rim_slack    =  0.1;  // mm, give the rim a little slack
+spool_protection_bulge  = 50;    // mm, diameter for led protection bulge
+
+
+// calculations
+
+spool_inner_net_height  = spool_inner_height - spool_inner_ring_height;
+spool_case_strip_height = led_strip_width + 10;  // give a little leeway
+spool_case_height       = spool_case_strip_height + spool_inner_net_height * 2;
+
+spool_case_cut        = led_strip_height / 2; 
+
+spool_case_diameter = spool_inner_diameter;
+spool_case_radius = spool_inner_diameter / 2;
+
+
+// helper vector to cut the spool case
+
+spool_cutter = [spool_case_diameter + 2, spool_case_diameter + 2, spool_case_diameter + 2];
+
 
 
 
@@ -102,10 +132,4 @@ module rounded_edge(length=20, radius=5, slack=0.25) {
             translate([0, 0, -1])
                 cylinder(length + 2, r=radius);
         }
-}
-
-
-module esp32_model() {
-    translate(esp32_offset)
-            import("5426 QT Py ESP32-S3.stl");
 }
