@@ -6,6 +6,25 @@ module led_strip_clutch_zone(slack=0) {
         cube([led_strip_width,  led_strip_clutch_length + 2 * slack, led_strip_clutch_height + slack]);
 }
 
+
+module strip_clutch(slack=0) {
+    strip_clutch_pressing = led_strip_height - led_strip_clutch_height;
+
+    /*
+    translate([-led_strip_width / 2, -slack / 2, led_strip_clutch_height])
+        cube([led_strip_width, led_strip_clutch_length + slack, strip_clutch_pressing]);
+    */
+    translate([(led_strip_width + case_wall) / 2, -slack/2, led_strip_clutch_height])
+        rotate([-90, 180, 0])
+            linear_extrude(led_strip_clutch_length + slack)
+                polygon([
+                    [0, strip_clutch_pressing + 1],
+                    [case_wall / 2, 0],
+                    [led_strip_width + case_wall / 2, 0],
+                    [led_strip_width + case_wall, strip_clutch_pressing + 1]
+                ]);
+}
+
 module led_strip(length=led_wire_length) {
 
     wire_radius = led_wire_diameter / 2;

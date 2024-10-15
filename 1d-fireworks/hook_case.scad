@@ -48,25 +48,6 @@ module hook(outer_dimensions=hook_case_outer, width=7.5, cut_offset=0, joiner=ca
 }
 
 
-module strip_clutch(slack=0) {
-    strip_clutch_pressing = led_strip_height - led_strip_clutch_height;
-
-    /*
-    translate([-led_strip_width / 2, -slack / 2, led_strip_clutch_height])
-        cube([led_strip_width, led_strip_clutch_length + slack, strip_clutch_pressing]);
-    */
-    translate([(led_strip_width + case_wall) / 2, -slack/2, led_strip_clutch_height])
-        rotate([-90, 180, 0])
-            linear_extrude(led_strip_clutch_length + slack)
-                polygon([
-                    [0, strip_clutch_pressing + 1],
-                    [case_wall / 2, 0],
-                    [led_strip_width + case_wall / 2, 0],
-                    [led_strip_width + case_wall, strip_clutch_pressing + 1]
-                ]);
-}
-
-
 module wire_clutch_press(outer_dimensions, case_cut_height) {
 
     inner_dimensions = outer_dimensions - 2 * [case_wall, case_wall, case_plate];
