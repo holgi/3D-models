@@ -57,11 +57,22 @@ module test_usb_c_holes() {
             }
 }
 // test_usb_c_holes();
-
+/*
 use <qtpy.scad>
 translate([0, 0, 2])
     qtpy_mount();
 cube([35, 35, 4], center=true);
-
-
-// cylinder(h=20, d1=spool_case_diameter + 2 * spool_case_taper, d2=spool_case_diameter);
+*/
+difference() {
+    for (d=[-1,0,1]) {
+        h = 5;
+        off = d*h;
+        delta = 0.25*d;
+        dia =spool_case_diameter + delta;
+        echo(dia)
+        translate([0,0,off])
+            cylinder(h=h, d=dia);
+    }
+    translate([0,0,-50])
+        cylinder(h=100, d=spool_case_diameter - 20);
+}
