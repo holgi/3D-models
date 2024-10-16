@@ -91,14 +91,14 @@ qtpy_clearance_lower = 1.5;      // mm, leave at least this much space below the
 
 // measured from prusa spools
 
-spool_inner_diameter      = 87.5;  // mm, measured
-spool_inner_height        = 20.0;  // mm, measured
-spool_inner_ring_height   =  5.0;  // mm, measured
+spool_inner_diameter      = 88.25;  // mm, measured
+spool_inner_height        = 20.0;   // mm, measured
+spool_inner_ring_height   =  5.0;   // mm, measured
 
 
 // some assumptions from my side
 
-spool_case_taper        =  0.25; // mm, amount of height added to have a slope for the spools to stick on
+spool_case_taper        =  0.75; // mm, amount of height added to have a slope for the spools to stick on
 spool_case_corner       =  1;    // mm, corner radius of the case
 spool_case_rim_height   =  2;    // mm, the hight of the rim of the cases fitting into each other
 spool_case_rim_slack    =  0.1;  // mm, give the rim a little slack
@@ -111,7 +111,7 @@ spool_inner_net_height  = spool_inner_height - spool_inner_ring_height;
 spool_case_strip_height = led_strip_width + 10;  // give a little leeway
 spool_case_height       = spool_case_strip_height + spool_inner_net_height * 2;
 
-spool_case_cut        = led_strip_height / 2; 
+spool_case_cut        = led_strip_height / 2;
 
 spool_case_diameter = spool_inner_diameter;
 spool_case_radius = spool_inner_diameter / 2;
