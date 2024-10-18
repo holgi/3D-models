@@ -171,7 +171,7 @@ color("Orange", 0.5)
     translate([0, wire_clutch_assembly_offset + led_wire_clutch_length / 2 + 2, 0])
         wire_clutch();
 
-hook_case_lower();
+!hook_case_lower();
 
 translate([50, 0, 0]) hook_case_upper();
 

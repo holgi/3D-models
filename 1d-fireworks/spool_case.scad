@@ -1,6 +1,7 @@
 
 include <dimensions.scad>;
 
+
 use <qtpy.scad>;
 use <led_strip.scad>;
 use <wire_clutch.scad>;
@@ -12,7 +13,7 @@ module spool_2d(delta=0, corner=spool_case_corner, taper=spool_case_taper, heigh
     half_height = height / 2;
     radius = spool_case_diameter / 2;
 
-    polygon = [
+    poly = [
         [-delta,          -half_height],
         [radius - corner, -half_height],
         [radius - corner, -half_height + corner],
@@ -25,7 +26,7 @@ module spool_2d(delta=0, corner=spool_case_corner, taper=spool_case_taper, heigh
     ];
 
     offset(r=-delta) {
-        polygon(polygon);
+        polygon(poly);
         translate([radius - corner, -half_height + corner, 0])
             circle(r=corner);
         translate([radius - corner, +half_height - corner, 0])
@@ -59,12 +60,12 @@ module spool_cut(height, direction=1) {
 }
 
 
-module spool_led_protection_bulge_2d() {
+module spool_led_protection_bulge_2d(length_correction=0, angle_correction=0) {
 
     angle = atan(spool_protection_bulge / spool_case_diameter);
     bulge_center_offset = spool_protection_bulge * (1 - cos(angle));
 
-    ellipses_length = spool_case_diameter + spool_protection_bulge + bulge_center_offset * 2;
+    ellipses_length = spool_case_diameter + spool_protection_bulge + bulge_center_offset * 2 - length_correction;
     ellipses_width  = spool_case_diameter;
     ellipses_cut    = [ellipses_length + 2, ellipses_width + 2];
 
@@ -78,7 +79,7 @@ module spool_led_protection_bulge_2d() {
                 square(ellipses_cut);
     }
 
-    rotate([0, 0, angle]) {
+    rotate([0, 0, angle + angle_correction]) {
         difference() {
             resize([ellipses_length, ellipses_width])
                 circle(d=20);
@@ -91,17 +92,32 @@ module spool_led_protection_bulge_2d() {
 }
 
 
-module spool_led_protection_bulge_3d(height=spool_case_strip_height, wall=5) {
+module spool_led_protection_bulge_3d(height=spool_case_strip_height, wall=5, length_correction=0, angle_correction=0) {
     translate([-height / 2, 0, 0])
         rotate([-90, 0, -90])
             difference() {
                 linear_extrude(height)
-                    spool_led_protection_bulge_2d();
+                    spool_led_protection_bulge_2d(length_correction, angle_correction);
                 translate([0,0,-1])
                     linear_extrude(height + 2)
                         offset(-wall)
-                            spool_led_protection_bulge_2d();
+                            spool_led_protection_bulge_2d(length_correction, angle_correction);
             }
+}
+
+
+module spool_rim_counterpart() {
+    poly = [
+        [-1,   -1],
+        [-1,   spool_case_cut],
+        [+0,   spool_case_cut],
+        [+0.5, spool_case_cut + 5],
+        [+3,   spool_case_cut + 5],
+        [+3,   -1],
+    ];
+    rotate([90, 0, 0])
+        linear_extrude(height = 10, center=true)
+            polygon(poly);
 }
 
 
@@ -116,7 +132,7 @@ module spool_case_lower_base(cut=spool_case_cut, rim=spool_case_rim_height, slac
         spool_case(wall=case_wall / 2 - slack);
 
     difference() {
-        spool_led_protection_bulge_3d(spool_case_strip_height - 5);
+        spool_led_protection_bulge_3d(spool_case_strip_height - 5, length_correction=3, angle_correction=2.5);
         cube([spool_case_strip_height + 1, spool_case_diameter, cut * 2], center=true);
     }
 }
@@ -171,18 +187,24 @@ module spool_case_lower() {
         // giving the clucth a little slack
         translate([0, 0, -led_strip_height / 2 + 0.2])
             strip_clutch(slack=2);
-
     }
+
+    copy_mirror([1,0,0])
+        translate([-spool_case_height / 2 + case_wall, 0, -spool_case_rim_height/2 - spool_case_rim_slack]) {
+            translate([0, spool_case_diameter * 1/3, ])
+                spool_rim_counterpart();
+            translate([0, spool_case_diameter * 2/3, ])
+                spool_rim_counterpart();
+        }
 
     // the wire clutch clamps
     inner_clutch_edge = hook_case_inner.x / 2 - 1;
     outer_clutch_edge = led_wire_clutch_width / 2 + case_wall;
     center_offset     = inner_clutch_edge + (outer_clutch_edge - inner_clutch_edge) / 2;
 
-    translate([-center_offset, wire_clutch_assembly_offset, - led_strip_height / 2])
-        clutch_clamp();
-    translate([+center_offset, wire_clutch_assembly_offset,  -led_strip_height / 2])
-        clutch_clamp();
+    copy_mirror([1,0,0])
+        translate([-center_offset, wire_clutch_assembly_offset, - led_strip_height / 2])
+            clutch_clamp();
 
 }
 
@@ -200,8 +222,7 @@ module spool_case_upper() {
     }
 
 
-    // translate([0, -spool_case_radius, led_strip_height + spool_case_cut])
-    translate([0,  -spool_case_radius, led_strip_height - spool_case_cut])
+    translate([0,  -spool_case_radius, led_strip_height - spool_case_cut - 0.25])
             rotate([0, 180, 0])
                 strip_clutch(slack=0);
 
@@ -212,17 +233,21 @@ module spool_case_upper() {
                 cube(spool_cutter, center=true);
         }
 
-
-    spool_wago_mount(25);
-    mirror([1,0,0]) spool_wago_mount(25);
+    copy_mirror([1,0,0])
+        spool_wago_mount(25);
 
     spool_qtpy_mount();
 
 }
 
+// uncomment for exporting
+$fn=360;
 
 
 translate([140,0,0]) spool_case_lower();
 
+
 translate([0,0,0]) spool_case_upper();
 
+
+!spool_case_lower_base();

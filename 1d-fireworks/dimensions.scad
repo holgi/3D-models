@@ -102,7 +102,7 @@ spool_case_taper        =  0.75; // mm, amount of height added to have a slope f
 spool_case_corner       =  1;    // mm, corner radius of the case
 spool_case_rim_height   =  2;    // mm, the hight of the rim of the cases fitting into each other
 spool_case_rim_slack    =  0.1;  // mm, give the rim a little slack
-spool_protection_bulge  = 50;    // mm, diameter for led protection bulge
+spool_protection_bulge  =  60;    // mm, diameter for led protection bulge
 
 
 // calculations
@@ -132,4 +132,10 @@ module rounded_edge(length=20, radius=5, slack=0.25) {
             translate([0, 0, -1])
                 cylinder(length + 2, r=radius);
         }
+}
+
+
+module copy_mirror(vector) {
+    children();
+    mirror(vector) children();
 }
