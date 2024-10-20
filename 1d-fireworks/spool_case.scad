@@ -244,10 +244,9 @@ module spool_case_upper() {
 $fn=360;
 
 
-translate([140,0,0]) spool_case_lower();
+!translate([140,0,0]) spool_case_lower();
 
 
 translate([0,0,0]) spool_case_upper();
 
 
-!spool_case_lower_base();
