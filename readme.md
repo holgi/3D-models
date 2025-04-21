@@ -7,6 +7,12 @@ All models are created with [OpenScad][openscad].
 Available models
 ----------------
 
+### 1d fireworks
+
+Use an old Prusament spool as elektronics case for a led strip used in a 1d
+fireswork project.
+
+
 ### BHF Aldi lamp holder
 
 A small holder for some led lamps with motion detector sold by Aldi. This
@@ -17,6 +23,10 @@ zip tie.
 ### Eufy H30 brush holder
 
 A holder for the cleaning brush included in the Eufy H30 vacuum cleaner.
+
+
+### ipad-wall-mount
+mounting my old iPad pro 9.7" to a wall as a secondary display.
 
 
 ### jst-adapter
@@ -34,6 +44,11 @@ are designed to add led lighting to the room.
 ### power-brick-mount
 
 A simple mount for power bricks. Size can be adapted by simple parameters.
+
+
+### shelf cable bind
+
+attach cable binders to a metal shelf setup
 
 
 ### sortimo lboxx mini
